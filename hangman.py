@@ -28,14 +28,10 @@ def guess_letter():
         if letter in string.ascii_lowercase:
             return letter
         else:
-            print(f"You have Enter {letter} which is not a letter\n")
+            print(f"You have Enter '{letter}' which is not a letter\n")
         
-def check_letter_in_word(letter, secret_word, letters_chosen):
-    letter_indices = []
-    if letter in letters_chosen:
-        print(f"You have already picked that letter: {letter}")
-    else:
-        letter_indices = [index for index, value in enumerate(secret_word) if letter == value]
+def check_letter_in_word(letter, secret_word):
+    letter_indices = [index for index, value in enumerate(secret_word) if letter == value]
     return letter_indices
 
 def show_board(letter,letter_indices, hidden_word):
@@ -51,33 +47,41 @@ def check_win(hidden_word, secret_word):
         return False
 
 def main():
-    lives = 6
+    tries = 6
     secret_word = generate_random_common_word()
     hidden_word = "-" * len(secret_word)
-    letters_chosen = []
+    incorrect_letters = []
 
-    player_name = input("\nHello! Welcome to our hangman game. \nWhat is your name: ")
-    print(f"Well {player_name}, you have 6 tries to get the correct word")
-    print(f"The secret word has {len(secret_word)} letters\n")
-    print(f"{hidden_word}")
+    print(f"{'=' * 60}")
+    player_name = input("Hello! Welcome to our hangman game. \nWhat is your name: ".upper())
+    print(f"Well {player_name}, you have 6 tries to get the correct word".upper())
+    print(f"{'=' * 60}")
+    print(f"\t\tThe secret word has {len(secret_word)} letters\n")
+   
+    while tries > 0:
+        print(f"{'=' * 30}")
+        print(f"{hidden_word}\n")
+        print(f"Incorrect Letters: {incorrect_letters}")
+        print(f"Tries: {tries}")
 
-    while lives > 0:
         letter = guess_letter()
-        letter_indices = check_letter_in_word(letter, secret_word, letters_chosen)
-
+        letter_indices = check_letter_in_word(letter, secret_word)
+    
         if len(letter_indices) > 0:
             hidden_word = show_board(letter,letter_indices, hidden_word)
             print(f"We have found {len(letter_indices)} '{letter}' in the secret word")
-            print(f"{hidden_word}\n")
+            
         else:
+            incorrect_letters.append(letter)
             print(f"Sorry there is no '{letter}' in the secret word")
-            print(f"{hidden_word}\n")
-            lives -= 1
+            tries -= 1
 
         if check_win(hidden_word, secret_word):
-            print(f"Congrats! You have found the secret word: {secret_word}")
+            print(f"""
+                  \tCongrats! You have found the secret word: {secret_word}""")
             return 0
-        letters_chosen.append(letter)
+        
+    print(f"{'=' * 60}")
     print(f"Sorry you have run out of tries. The secret word was:{secret_word} ")
 
 if __name__ == "__main__":
