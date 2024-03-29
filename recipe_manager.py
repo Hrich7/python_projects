@@ -2,214 +2,170 @@ import os
 from pathlib import Path
 import time, string
 
-# Create a folder called "Recipes" in the base folder of the computer
-# Welcome greeting
-# The recipes are in --> Path to recipes folder
-# You have [x] recipies (Check folders and subfolders)
-# Display the Menu (inside a while loop)
-
-#   [1] - Read Recipe
-    # > Choose Category
-    # > show Recipes
-    # > choose Recipe
-    # > Show the content of that recipe
-
-#   [2] - Create recipe
-    # > Choose Category
-    # > Create name of recipe
-    # > Create content of recipe
-
-#   [3] - Create category
-    # > Category name
-    # > Create Category ==> Generate a brand new folder
-
-#   [4] - Delete Recipe
-    # > Choose Category
-    # > show Recipes
-    # > choose Recipe
-    # > Delete recipe (delete file?)
-
-#   [5] - Delete Category
-    # > choose Category
-    # > delete category ==> Delete folder with contents
-
-#   [6] - End Program
-    # > End the program
-
-
-#          Menu  
-#   [1] - Read Recipe
-#   [2] - Create recipe
-#   [3] - Create category
-#   [4] - Delete Recipe
-#   [5] - Delete Category
-#   [6] - End Program
-
-
-
 def create_recipe_folder(*args):
     pass
 
-def display_menu():
+def choose_menu_option(recipes_folder ):
     """
-        Display the Menu for the recipe Manager
+        Display the Menu for the recipe Manager and Let the user choose a Menu option
     """
-    print(f"\n{'=' * 10}Menu{'=' * 10}")
-    print("[1] - Read Recipe\n")
-    print("[2] - Create recipe\n")
-    print("[3] - Create category\n")
-    print("[4] - Delete Recipe\n")
-    print("[5] - Delete Category\n")
-    print("[6] - End Program\n")
-    print("=" * 27)
+    clear_screen()
+    print("=" * 100)
+    print("\t\t\t\t\tWELCOME TO THE RECIPE MANAGER\n")
+    print("=" * 100)
+    print("\n")
+    print(f"The recipes are in: {recipes_folder}\n")
+    total_recipes = [recipe for recipe in recipes_folder.glob('**/*.txt')]
+    print(f"You currently have {len(total_recipes)} Recipes\n")
 
-def choose_category(recipes_folder):
+    menu_choice = 'x'
+    while not menu_choice.isnumeric() or int(menu_choice) not in range(1,7):
+        print(f"\n{'=' * 10}Menu{'=' * 10}")
+        print("[1] - Read Recipe\n")
+        print("[2] - Create recipe\n")
+        print("[3] - Create category\n")
+        print("[4] - Delete Recipe\n")
+        print("[5] - Delete Category\n")
+        print("[6] - End Program\n")
+        print("=" * 27)
+        menu_choice = input("Please choose a Menu Option between 1-6:  ")
+    return int(menu_choice)
+
+def show_categories(recipes_folder):
+    categories = [category for category in recipes_folder.iterdir() if category.is_dir()]
+    print(f"\nThese are our current categories :\n")
+    for i, c in enumerate(categories):
+        print(f"{i+1}. {c.name}")
+    return categories
+
+def choose_category(category_list):
     """
-        Choose a Recipe category from the list of categories in the Recipe folder
+        Choose a category from the list of categories
     """
-    categories = [category.name for category in recipes_folder.iterdir() if category.is_dir()]
-    number_of_categories = len(categories)
-    while True:
-        print(f"These are our current categories :\n")
-        for i, c in enumerate(categories):
-            print(f"{i+1}. {c}")
+    category_choice = 'x'
+    while not category_choice.isnumeric() or int(category_choice) not in range(1, len(category_list) + 1):
+        category_choice = input("\nChoose a category: ")
+    return category_list[int(category_choice) - 1]
 
-        category = input(f'Choose Category as a number between 1 - {number_of_categories}: ')
+def show_recipes(category_path):
+    recipes_path = Path(category_path)
+    recipes = [recipe for recipe in recipes_path.iterdir() if recipe.is_file()]
+    print(f"\nThese are our current recipes in the {category_path.name} category :\n")
+    for i, r in enumerate(recipes):
+        print(f"{i+1}. {r.name}")
+    return recipes
 
-        if category in string.digits:
-            category = int(category)
-            if category <= number_of_categories:
-                return categories[category - 1]
-            else:
-                print("\nWrong input!\n")
-        else:
-            print("You need to enter a number from the following to choose the category")
+def choose_recipe(recipe_list):
+    """
+        Choose a category from the list of categories
+    """
+    recipe_choice = 'x'
+    while not recipe_choice.isnumeric() or int(recipe_choice) not in range(1, len(recipe_list) + 1):
+        recipe_choice = input("\nChoose a recipe: ")
+    return recipe_list[int(recipe_choice) - 1]
 
 
-def read_recipe(recipes_folder,category):
+def read_recipe(recipe):
     """
         Read a recipe content from a specific category
     """
-    category_path = Path(recipes_folder, category)
-    recipes = [recipe for recipe in category_path.iterdir() if recipe.is_file()]
-    number_of_recipes = len(recipes)
-    print(f"List of Current Recipes in {category}: ")
-    for i, recipe in enumerate(recipes):
-        print(f"\t{i+1}. {recipe.stem}")
-    if number_of_recipes == 0:
-        print(f"There are curently no recipes in the {category} category")
-    else:
-        choice_of_recipe = int(input(f"\nChoose the recipe number you want to read: (1 - {number_of_recipes}): "))
-        while choice_of_recipe > number_of_recipes or choice_of_recipe <= 0:
-            print("Invalid choice!\n")
-            choice_of_recipe = int(input(f"\nChoose the recipe number you want to read: (1 - {number_of_recipes}): "))
+    print(Path.read_text(recipe))
 
-        with open(recipes[choice_of_recipe - 1]) as f:
-            print(f.read())
-
-def create_recipe(recipes_folder,category):
+def create_recipe(category_path):
     """
         Create a recipe content in a specific category
     """
-
-    recipe_path = Path(recipes_folder, category)
-    print(f"You want to create a recipe in the {category} category\n")
-    recipe_name = input("What is your recipe name: ")
-    recipe_content = input (f"What is the content of the {recipe_name} recipe: ")
-    with Path(recipe_path, recipe_name +'.txt').open(mode='a') as f:
-        f.write(recipe_content)
+    print(f"Write the name of your new {category_path.name} recipe: \n")
+    recipe_name = input()
+    recipe_path = Path(category_path, recipe_name + '.txt')
+    if recipe_path.is_file():
+        print(f"Sorry, recipe {recipe_name} already exist")
+    else:
+        recipe_content = input("Write your new recipe: \n")
+        with recipe_path.open(mode='w') as file:
+            file.write(recipe_content)
+        #Path.write_text(recipe_path, recipe_content)
+        print(f"Your recipe {recipe_name}.txt has been created")
 
 def create_category(recipes_folder):
     """
         Create a Recipe Category in the Recipes' Folder
     """
 
-    category = input("What is the name of the category you want to create: ")
-    category_path = Path(recipes_folder, category)
+    category_name = input("Write the name of the new category: ")
+    category_path = Path(recipes_folder, category_name)
     if not category_path.exists():
         category_path.mkdir(parents=True)
+        print(f"Your new category {category_name} has been created")
     else:
         print(f"Category '{category_path}' already exits")
 
-def delete_recipe(recipes_folder,category):
+def delete_recipe(recipe):
     """
         Delete a Recipe file from a Category 
     """
+    Path(recipe).unlink()
+    print(f"The recipe {recipe.name} has been deleted")
 
-    category_path = Path(recipes_folder, category)
-    print(f"You want to delete a recipe in the {category} category\n")
-    recipes_in_category = [recipe for recipe in category_path.iterdir() if recipe.is_file()]
-    number_of_recipes = len(recipes_in_category)
-    print(f"List of Current Recipes in {category}: ")
-    for i, recipe in enumerate(recipes_in_category):
-        print(f"\t{i+1}. {recipe.stem}")
-    if number_of_recipes == 0:
-        print(f"There are curently no recipes in the {category} category")
-    else:
-        if number_of_recipes == 1:
-            recipe_number = int(input("Choose the recipe number you want to delete: (1) "))
-        else :
-            recipe_number = int(input(f"Choose the recipe number you want to delete: (1 - {number_of_recipes}): "))
-        print(f"Deleting the recipe for {recipes_in_category[recipe_number - 1].stem} ...")
-        recipes_in_category[recipe_number - 1].unlink()
-
-def delete_category(recipes_folder, category):
+def delete_category(category):
     """
         Delete a Category of Recipe from the Recipes' Folder
     """
-
-    category_path = Path(recipes_folder, category)
-    print(f"removing the {category_path.name} recipe category...")
-    time.sleep(2)
-    category_path.rmdir()
-    
+    Path(category).rmdir()
+    print(f"The {category.name} has been deleted")
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def main():
-    clear_screen()
-    print("=" * 100)
-    print("\t\t\t\t\tWELCOME TO THE RECIPE MANAGER\n")
-    print("=" * 100)
-    print("\n")
+def return_to_menu():
+    return_choice = 'x'
+    while return_choice.lower() != 'b':
+        return_choice = input("\nPress 'b' to return to the menu: ")
 
+
+def main():
     base = Path.home()
     recipes_folder = Path(base, 'Recipes')
-    print(f"The recipes are in: {recipes_folder}\n")
-    total_recipes = [recipe for recipe in recipes_folder.glob('**/*.txt')]
-    print(f"You currently have {len(total_recipes)} in the Recipes folder\n")
-    time.sleep(3)
     
-    manage_recipy = True
-    while manage_recipy:
-        clear_screen()
-        print("\t\t\t\t\t\tRECIPE MANAGER\n")
-        display_menu()
-        menu_option = int(input("Please choose a Menu Option between 1-6:  "))
+    manage_recipe = True
+    while manage_recipe:
+        menu_option = choose_menu_option(recipes_folder)
         match menu_option:
             case 1:
-                category = choose_category(recipes_folder)
-                read_recipe(recipes_folder,category)
-                time.sleep(3)
+                category_list = show_categories(recipes_folder)
+                category = choose_category(category_list)
+                recipe_list = show_recipes(category)
+                if len(recipe_list) < 1:
+                    print(f"There is no recipes in the {category.name} category")
+                else:
+                    recipe = choose_recipe(recipe_list)
+                    read_recipe(recipe)
+                return_to_menu()
             case 2 :
-                category = choose_category(recipes_folder)
-                create_recipe(recipes_folder,category)
+                category_list = show_categories(recipes_folder)
+                category = choose_category(category_list)
+                create_recipe(category)
+                return_to_menu()
             case 3: 
                 create_category(recipes_folder)
+                return_to_menu()
             case 4:
-                category = choose_category(recipes_folder)
-                delete_recipe(recipes_folder,category)
-                time.sleep(3)
+                category_list = show_categories(recipes_folder)
+                category = choose_category(category_list)
+                recipe_list = show_recipes(category)
+                if len(recipe_list) < 1:
+                    print(f"There is no recipes in the {category.name} category")
+                else:
+                    recipe = choose_recipe(recipe_list)
+                    delete_recipe(recipe)
+                return_to_menu()
             case 5:
-                category = choose_category(recipes_folder)
-                delete_category(recipes_folder, category)
-                time.sleep(3)
+                category_list = show_categories(recipes_folder)
+                category = choose_category(category_list)
+                delete_category(category)
+                return_to_menu()
             case 6:
-                    manage_recipy = False
-            case _:
-                print("Wrong input for the menu option. Please try again")
-                time.sleep(2)
+                    manage_recipe = False
 
 if __name__ == '__main__':
     main()
