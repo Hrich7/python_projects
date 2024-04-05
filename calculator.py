@@ -15,7 +15,7 @@ logo = """
 | |___|___|___| |___| |  '----------------'  '----------------'  '----------------'  '----------------' 
 |_____________________|
 """
-
+"""
 def add(number1, number2):
     return number1 + number2
 
@@ -36,25 +36,46 @@ operations = {
     "-" : subtract,
     "*" : multiply,
     "/" : divide,
+}"""
+
+
+symbol_of_operation = {
+    '+' : lambda x, y : x + y,
+    '-' : lambda x, y : x - y,
+    '*' : lambda x, y : x * y,
+    '/' : lambda x, y : x / y if y != 0 else 0,
+    '**' : lambda x, y : x ** y,
+    '%' : lambda x, y : x % y,
+
 }
 
+
 def calculator():
+    os.system('clear')
     print(logo)
     first_number = float(input("What's the first number?: "))
-    for ops in operations:
+    for ops in symbol_of_operation:
         print(ops)
     another_operation = 'y'
     while another_operation == 'y':
         operation = input("Pick an operation: ")
-        next_number = float(input("What's the next number?: "))
-        answer = operations[operation](first_number, next_number)
+        if operation in symbol_of_operation:
+            next_number = float(input("What's the next number?: "))
+            if operation == '/' and next_number == 0:
+                print('Error: Division by zero')
+                answer = 0
+            answer = symbol_of_operation[operation](first_number, next_number)
         
-        print(f"{first_number} {operation} {next_number} = {answer}")
+            print(f"{first_number} {operation} {next_number} = {answer}")
         
-        another_operation = input(f"Type 'y' to continue calculating with {answer}, or type 'n' to start a new calculation: ")
-        if another_operation == 'y':
-            first_number = answer
+            another_operation = input(f"Type 'y' to continue calculating with {answer}, or type 'n' to start a new calculation: ")
+            if another_operation == 'y':
+                first_number = answer
+            else:
+                os.system('clear')
+                calculator()
         else:
+            print("Unsupported symbol of operation. Please enter one of the supported symbols")
             os.system('clear')
             calculator()
 
